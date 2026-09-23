@@ -28,6 +28,7 @@ $longitude = $_POST['longitude'] ?? null;
 $deviceLatitude = $_POST['device_latitude'] ?? null;
 $deviceLongitude = $_POST['device_longitude'] ?? null;
 $accuracy = $_POST['location_accuracy_m'] ?? null;
+$locationName = trim($_POST['location_name'] ?? '');
 $barangayId = $_POST['barangay_id'] ?? null;
 
 if ($latitude === null || $longitude === null) {
@@ -139,7 +140,7 @@ try {
     );
     $insertNotification->execute(['user_id' => $user['user_id']]);
 
-    notifyPersonnelOfNewReport($pdo, $reportId);
+    notifyPersonnelOfNewReport($pdo, $reportId, $locationName !== '' ? $locationName : null);
 
     $pdo->commit();
 } catch (Exception $e) {

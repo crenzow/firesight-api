@@ -41,7 +41,7 @@ function notifyReportStatusChange(PDO $pdo, int $reportId, string $status): void
 }
 
 /** Creates a notification for every active BFP personnel account. */
-function notifyPersonnelOfNewReport(PDO $pdo, int $reportId): void
+function notifyPersonnelOfNewReport(PDO $pdo, int $reportId, ?string $submittedLocation = null): void
 {
     $reportStmt = $pdo->prepare(
         'SELECT r.ai_fire_label, r.ai_fire_confidence, r.latitude, r.longitude, b.barangay_name
@@ -61,7 +61,10 @@ function notifyPersonnelOfNewReport(PDO $pdo, int $reportId): void
         return;
     }
 
-    $locationName = trim((string) ($report['barangay_name'] ?? ''));
+    $locationName = trim((string) $submittedLocation);
+    if ($locationName === '') {
+        $locationName = trim((string) ($report['barangay_name'] ?? ''));
+    }
     if ($locationName === '' && $report['latitude'] !== null && $report['longitude'] !== null) {
         $matchedBarangayId = findBarangayByLocation((float) $report['latitude'], (float) $report['longitude'], $pdo);
         if ($matchedBarangayId !== null) {
@@ -70,7 +73,9 @@ function notifyPersonnelOfNewReport(PDO $pdo, int $reportId): void
             $locationName = trim((string) ($locationStmt->fetchColumn() ?: ''));
         }
     }
-    if ($report['latitude'] !== null && $report['longitude'] !== null) {
+    // Keep the mobile geocoder result when it was submitted. Only use the
+    // server-side resolver when the app could not produce a readable name.
+    if ($locationName === '' && $report['latitude'] !== null && $report['longitude'] !== null) {
         if (function_exists('findReadableLocation')) {
             $locationName = call_user_func(
                 'findReadableLocation',
