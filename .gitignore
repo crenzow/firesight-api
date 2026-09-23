@@ -1,0 +1,19 @@
+# Python virtual environment & cache
+.venv/
+fire-verification-service/.venv/
+__pycache__/
+*.pyc
+
+# Environment settings & secrets
+.env
+
+# VS Code settings
+.vscode/
+
+# Uploads or temporary data
+uploads/
+*.log
+
+# Ignore specific python files in the root folder
+rename_dataset.py
+train_fireverification_v2.py
