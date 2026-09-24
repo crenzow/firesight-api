@@ -33,7 +33,7 @@ try {
         // Table might not exist, safely ignore
     }
     
-    $incident['evidence'] = $evidence;
+    $incident['evidence_photos'] = $evidence;
     
     // Fetch barangay contacts
     $contacts = [];

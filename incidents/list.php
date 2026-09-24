@@ -19,12 +19,28 @@ $search = $_GET['search'] ?? null;
 
 $sql = "
     SELECT 
-        r.*, 
-        i.incident_type, i.severity_level, i.cause_of_fire, i.casualties, i.notes,
+        r.report_id,
+        r.reporter_name,
+        r.contact_number,
+        r.description,
+        r.report_image,
+        r.latitude,
+        r.longitude,
+        r.location_accuracy_m,
+        r.status,
+        r.created_at,
+        r.ai_fire_label,
+        r.ai_fire_confidence,
+        COALESCE(i.barangay_id, r.barangay_id) AS barangay_id,
+        i.incident_type,
+        i.severity_level,
+        i.cause_of_fire,
+        i.casualties,
+        i.notes,
         b.barangay_name
     FROM community_report r
-    LEFT JOIN incident_record i ON r.report_id = i.report_id
-    LEFT JOIN barangay b ON r.barangay_id = b.barangay_id
+    LEFT JOIN incident_record i ON i.report_id = r.report_id
+    LEFT JOIN barangay b ON b.barangay_id = COALESCE(i.barangay_id, r.barangay_id)
     WHERE 1=1
 ";
 $params = [];
@@ -35,12 +51,12 @@ if ($status) {
 }
 
 if ($barangay_id) {
-    $sql .= " AND r.barangay_id = :barangay_id";
+    $sql .= " AND COALESCE(i.barangay_id, r.barangay_id) = :barangay_id";
     $params['barangay_id'] = $barangay_id;
 }
 
 if ($year) {
-    $sql .= " AND YEAR(r.created_at) = :year";
+    $sql .= " AND YEAR(COALESCE(i.data_time, r.created_at)) = :year";
     $params['year'] = $year;
 }
 

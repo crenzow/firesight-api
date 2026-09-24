@@ -19,18 +19,18 @@ $barangayId  = $_POST['barangay_id']    ?? null;
 $latitude    = $_POST['latitude']       ?? null;
 $longitude   = $_POST['longitude']      ?? null;
 $description = trim($_POST['description'] ?? '');
-$incidentType = $_POST['incident_type'] ?? 'residential_fire';
-$severityLevel = $_POST['severity_level'] ?? 'low';
+$incidentType = $_POST['incident_type'] ?? null;
+$severityLevel = $_POST['severity_level'] ?? null;
 $dataTime    = $_POST['data_time']      ?? null;
 $causeOfFire = trim($_POST['cause_of_fire'] ?? '') ?: null;
 $casualties  = isset($_POST['casualties']) ? (int) $_POST['casualties'] : 0;
 $notes       = trim($_POST['notes'] ?? '') ?: null;
 
-if (!$barangayId || !$latitude || !$longitude || !$description) {
-    sendError('barangay_id, latitude, longitude, and description are required.', 422);
+if (!$barangayId || !$latitude || !$longitude || !$description || !$incidentType || !$severityLevel) {
+    sendError('barangay_id, latitude, longitude, description, incident_type, and severity_level are required.', 422);
 }
 
-$allowedSeverities = ['low', 'medium', 'high', 'critical'];
+$allowedSeverities = ['low', 'moderate', 'high', 'critical'];
 
 if (!in_array($incidentType, ['residential_fire', 'commercial_fire', 'vehicular_fire', 'storage_fire', 'rubbish_fire', 'others'], true)) {
     sendError('Invalid incident_type.', 422);

@@ -50,8 +50,8 @@ $sql = "
         i.cause_of_fire,
         i.casualties,
         i.notes
-    FROM community_report r
-    LEFT JOIN incident_record i ON i.report_id = r.report_id
+    FROM incident_record i
+    INNER JOIN community_report r ON r.report_id = i.report_id
     LEFT JOIN barangay b ON b.barangay_id = COALESCE(i.barangay_id, r.barangay_id)
     WHERE r.status IN ('accepted', 'dispatched', 'resolved')
       AND r.latitude IS NOT NULL
@@ -90,8 +90,8 @@ try {
             'description'      => $row['description'],
             'status'           => $row['status'],
             'created_at'       => $row['created_at'],
-            'incident_type'    => $row['incident_type'] ?? 'residential_fire',
-            'severity_level'   => $row['severity_level'] ?? 'low',
+            'incident_type'    => $row['incident_type'],
+            'severity_level'   => $row['severity_level'],
             'data_time'        => $row['data_time'],
             'cause_of_fire'    => $row['cause_of_fire'],
             'casualties'       => $row['casualties'] !== null ? (int) $row['casualties'] : null,

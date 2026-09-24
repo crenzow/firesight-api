@@ -18,9 +18,13 @@ if (!$reportId) {
 $body = getJsonBody();
 $pdo = getDbConnection();
 
-$incidentType = $body['incident_type'] ?? 'residential_fire';
+$incidentType = $body['incident_type'] ?? null;
 if (!in_array($incidentType, ['residential_fire', 'commercial_fire', 'vehicular_fire', 'storage_fire', 'rubbish_fire', 'others'], true)) {
     sendError('Invalid incident_type.', 422);
+}
+$severityLevel = $body['severity_level'] ?? null;
+if (!in_array($severityLevel, ['low', 'moderate', 'high', 'critical'], true)) {
+    sendError('Invalid severity_level.', 422);
 }
 
 try {
@@ -42,7 +46,7 @@ try {
     $params = [
         'report_id' => $reportId,
         'incident_type' => $incidentType,
-        'severity_level' => $body['severity_level'] ?? 'low',
+        'severity_level' => $severityLevel,
         'cause_of_fire' => $body['cause_of_fire'] ?? null,
         'casualties' => $body['casualties'] ?? 0,
         'notes' => $body['notes'] ?? null,

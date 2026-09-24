@@ -59,9 +59,9 @@ try {
         if (!$incidentStmt->fetchColumn()) {
             $insertIncident = $pdo->prepare(
                 "INSERT INTO incident_record
-                    (report_id, barangay_id, data_time, incident_type, severity_level)
+                    (report_id, barangay_id, data_time)
                  VALUES
-                    (:report_id, :barangay_id, :data_time, 'residential_fire', 'low')"
+                    (:report_id, :barangay_id, :data_time)"
             );
             $insertIncident->execute([
                 'report_id' => $report_id,
