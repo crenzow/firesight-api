@@ -25,7 +25,7 @@ $sql = "
         b.centroid_lat,
         b.centroid_lng,
         b.boundary_geojson,
-        COALESCE(latest.risk_level, 'low') AS risk_level,
+        COALESCE(latest.risk_level, 'mild') AS risk_level,
         COALESCE(latest.prediction_score, 0) AS prediction_score
     FROM barangay b
     LEFT JOIN (
@@ -44,13 +44,22 @@ $stmt = $pdo->query($sql);
 $rows = $stmt->fetchAll();
 
 $result = array_map(function ($row) {
+    $rawRisk = strtolower($row['risk_level'] ?? 'mild');
+    if ($rawRisk === 'critical' || $rawRisk === 'high') {
+        $normalizedRisk = 'high';
+    } elseif ($rawRisk === 'moderate' || $rawRisk === 'medium') {
+        $normalizedRisk = 'moderate';
+    } else {
+        $normalizedRisk = 'mild';
+    }
+
     return [
         'barangay_id' => (int) $row['barangay_id'],
         'barangay_name' => $row['barangay_name'],
         'centroid_lat' => (float) $row['centroid_lat'],
         'centroid_lng' => (float) $row['centroid_lng'],
         'boundary_geojson' => $row['boundary_geojson'],
-        'risk_level' => $row['risk_level'],
+        'risk_level' => $normalizedRisk,
         'prediction_score' => (float) $row['prediction_score'],
     ];
 }, $rows);

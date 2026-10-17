@@ -32,7 +32,7 @@ app = FastAPI(title="FIRESIGHT Fire Verification Service")
 # ---- Config ----
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "fire_verification_model.onnx")
 IMG_SIZE = (224, 224)  # must match training (MobileNetV3, 224x224)
-CONFIDENCE_THRESHOLD = 0.5  # >= this => classified as fire (label 1 = fire, per training)
+CONFIDENCE_THRESHOLD = 0.48  # >= this => classified as fire (label 1 = fire, per training)
 
 # ---- Load model once at startup ----
 ort_session = None

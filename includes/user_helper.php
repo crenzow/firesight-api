@@ -45,6 +45,14 @@ function getUserWithAddress(PDO $pdo, int $userId): ?array
         }
     }
 
+    $profileImage = $user['profile_image'];
+    if ($profileImage && !str_starts_with($profileImage, 'http')) {
+        $fullPath = __DIR__ . '/../' . ltrim($profileImage, '/');
+        if (file_exists($fullPath)) {
+            $profileImage .= '?v=' . filemtime($fullPath);
+        }
+    }
+
     return [
         'user_id' => (int) $user['user_id'],
         'role' => $user['role'],
@@ -54,7 +62,7 @@ function getUserWithAddress(PDO $pdo, int $userId): ?array
         'suffix' => $user['suffix'],
         'contact_number' => $user['contact_number'],
         'email' => $user['email'],
-        'profile_image' => $user['profile_image'],
+        'profile_image' => $profileImage,
         'is_verified' => (bool) $user['is_verified'],
         'address' => $address ? [
             'house_no_street' => $address['house_no_street'],

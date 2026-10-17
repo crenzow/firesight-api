@@ -34,7 +34,7 @@ function verifyFireImage(string $absoluteImagePath): array
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => ['image' => $curlFile],
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 10, // don't let a slow/dead service hang the request
+        CURLOPT_TIMEOUT => 10,
         CURLOPT_CONNECTTIMEOUT => 3,
     ]);
 

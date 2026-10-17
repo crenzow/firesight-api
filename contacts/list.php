@@ -24,7 +24,7 @@ $result = array_map(function ($row) {
     return [
         'contact_id' => (int) $row['contact_id'],
         'name' => $row['name'],
-        'category' => $row['category']--,
+        'category' => $row['category'],
         'phone_number' => $row['phone_number'],
         'description' => $row['description'],
         'is_primary' => (bool) $row['is_primary'],
