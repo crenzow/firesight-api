@@ -19,12 +19,19 @@ $body = getJsonBody();
 $pdo = getDbConnection();
 
 $incidentType = $body['incident_type'] ?? null;
-if (!in_array($incidentType, ['residential_fire', 'commercial_fire', 'vehicular_fire', 'storage_fire', 'rubbish_fire', 'others'], true)) {
-    sendError('Invalid incident_type.', 422);
+$validIncidentTypes = ['residential_fire', 'commercial_fire', 'vehicular_fire', 'storage_fire', 'rubbish_fire', 'others'];
+if ($incidentType && !in_array($incidentType, $validIncidentTypes, true)) {
+    $incidentType = null;
 }
-$severityLevel = $body['severity_level'] ?? null;
-if (!in_array($severityLevel, ['low', 'moderate', 'high', 'critical'], true)) {
-    sendError('Invalid severity_level.', 422);
+$alarmLevel = $body['alarm_level'] ?? null;
+$validAlarmLevels = [
+    '1st_alarm', '2nd_alarm', '3rd_alarm', '4th_alarm', '5th_alarm',
+    'task_force_alpha', 'task_force_bravo', 'task_force_charlie',
+    'task_force_delta', 'task_force_echo', 'task_force_hotel',
+    'task_force_india', 'general_alarm'
+];
+if ($alarmLevel && !in_array($alarmLevel, $validAlarmLevels, true)) {
+    $alarmLevel = null;
 }
 
 try {
@@ -46,7 +53,7 @@ try {
     $params = [
         'report_id' => $reportId,
         'incident_type' => $incidentType,
-        'severity_level' => $severityLevel,
+        'alarm_level' => $alarmLevel,
         'cause_of_fire' => $body['cause_of_fire'] ?? null,
         'casualties' => $body['casualties'] ?? 0,
         'notes' => $body['notes'] ?? null,
@@ -56,7 +63,7 @@ try {
         $stmt = $pdo->prepare("
             UPDATE incident_record 
             SET incident_type = :incident_type,
-                severity_level = :severity_level, 
+                alarm_level = :alarm_level, 
                 cause_of_fire = :cause_of_fire, 
                 casualties = :casualties, 
                 notes = :notes 
@@ -64,11 +71,11 @@ try {
         ");
         $stmt->execute($params);
     } else {
-        $params['barangay_id'] = $report['barangay_id'];
-        $params['data_time'] = $report['created_at'];
+        $params['barangay_id'] = $report['barangay_id'] ?? 1;
+        $params['incident_datetime'] = $report['created_at'];
         $stmt = $pdo->prepare("
-            INSERT INTO incident_record (report_id, barangay_id, data_time, incident_type, severity_level, cause_of_fire, casualties, notes) 
-            VALUES (:report_id, :barangay_id, :data_time, :incident_type, :severity_level, :cause_of_fire, :casualties, :notes)
+            INSERT INTO incident_record (report_id, barangay_id, incident_datetime, incident_type, alarm_level, cause_of_fire, casualties, notes) 
+            VALUES (:report_id, :barangay_id, :incident_datetime, :incident_type, :alarm_level, :cause_of_fire, :casualties, :notes)
         ");
         $stmt->execute($params);
     }

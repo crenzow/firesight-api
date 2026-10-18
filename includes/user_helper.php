@@ -31,7 +31,7 @@ function getUserWithAddress(PDO $pdo, int $userId): ?array
     $personnelDetails = null;
     if ($user['role'] === 'personnel') {
         $pdStmt = $pdo->prepare(
-            'SELECT rank, station_assigned, employee_number
+            'SELECT rank, station_assigned, employee_number, duty_group
              FROM bfp_personnel_details WHERE user_id = :id LIMIT 1'
         );
         $pdStmt->execute(['id' => $userId]);
@@ -41,6 +41,7 @@ function getUserWithAddress(PDO $pdo, int $userId): ?array
                 'rank' => $row['rank'],
                 'station_assigned' => $row['station_assigned'],
                 'employee_number' => $row['employee_number'],
+                'duty_group' => $row['duty_group'] ?? null,
             ];
         }
     }

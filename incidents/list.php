@@ -33,7 +33,8 @@ $sql = "
         r.ai_fire_confidence,
         COALESCE(i.barangay_id, r.barangay_id) AS barangay_id,
         i.incident_type,
-        i.severity_level,
+        i.alarm_level,
+        i.incident_datetime,
         i.cause_of_fire,
         i.casualties,
         i.notes,
@@ -56,7 +57,7 @@ if ($barangay_id) {
 }
 
 if ($year) {
-    $sql .= " AND YEAR(COALESCE(i.data_time, r.created_at)) = :year";
+    $sql .= " AND YEAR(COALESCE(i.incident_datetime, r.created_at)) = :year";
     $params['year'] = $year;
 }
 
@@ -65,7 +66,7 @@ if ($search) {
     $params['search'] = '%' . $search . '%';
 }
 
-$sql .= " ORDER BY r.created_at DESC";
+$sql .= " ORDER BY COALESCE(i.incident_datetime, r.created_at) DESC, r.created_at DESC, r.report_id DESC";
 
 try {
     $stmt = $pdo->prepare($sql);

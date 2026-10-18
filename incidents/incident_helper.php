@@ -17,7 +17,9 @@ function formatIncidentRow(array $row): array {
         'ai_fire_label' => $row['ai_fire_label'] ?? null,
         'ai_fire_confidence' => $row['ai_fire_confidence'] !== null ? (float) $row['ai_fire_confidence'] : null,
         'incident_type' => $row['incident_type'] ?? null,
-        'severity_level' => $row['severity_level'] ?? null,
+        'alarm_level' => $row['alarm_level'] ?? null,
+        'incident_datetime' => $row['incident_datetime'] ?? null,
+        'data_time' => $row['incident_datetime'] ?? $row['created_at'],
         'cause_of_fire' => $row['cause_of_fire'] ?? null,
         'casualties' => isset($row['casualties']) ? (int) $row['casualties'] : null,
         'notes' => $row['notes'] ?? null,
@@ -28,7 +30,7 @@ function fetchIncident(PDO $pdo, int $reportId): ?array {
     $sql = "
         SELECT 
             r.*, 
-            i.incident_type, i.severity_level, i.cause_of_fire, i.casualties, i.notes,
+            i.incident_type, i.alarm_level, i.incident_datetime, i.cause_of_fire, i.casualties, i.notes,
             b.barangay_name
         FROM community_report r
         LEFT JOIN incident_record i ON r.report_id = i.report_id

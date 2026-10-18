@@ -19,24 +19,27 @@ $barangayId  = $_POST['barangay_id']    ?? null;
 $latitude    = $_POST['latitude']       ?? null;
 $longitude   = $_POST['longitude']      ?? null;
 $description = trim($_POST['description'] ?? '');
-$incidentType = $_POST['incident_type'] ?? null;
-$severityLevel = $_POST['severity_level'] ?? null;
-$dataTime    = $_POST['data_time']      ?? null;
+$alarmLevel  = $_POST['alarm_level']    ?? null;
+$validAlarmLevels = [
+    '1st_alarm', '2nd_alarm', '3rd_alarm', '4th_alarm', '5th_alarm',
+    'task_force_alpha', 'task_force_bravo', 'task_force_charlie',
+    'task_force_delta', 'task_force_echo', 'task_force_hotel',
+    'task_force_india', 'general_alarm'
+];
+if ($alarmLevel && !in_array($alarmLevel, $validAlarmLevels, true)) {
+    $alarmLevel = null;
+}
+$dataTime    = $_POST['incident_datetime'] ?? $_POST['data_time'] ?? null;
 $causeOfFire = trim($_POST['cause_of_fire'] ?? '') ?: null;
 $casualties  = isset($_POST['casualties']) ? (int) $_POST['casualties'] : 0;
 $notes       = trim($_POST['notes'] ?? '') ?: null;
 
-if (!$barangayId || !$latitude || !$longitude || !$description || !$incidentType || !$severityLevel) {
-    sendError('barangay_id, latitude, longitude, description, incident_type, and severity_level are required.', 422);
+if (!$barangayId || !$latitude || !$longitude || !$description || !$incidentType) {
+    sendError('barangay_id, latitude, longitude, description, and incident_type are required.', 422);
 }
-
-$allowedSeverities = ['low', 'moderate', 'high', 'critical'];
 
 if (!in_array($incidentType, ['residential_fire', 'commercial_fire', 'vehicular_fire', 'storage_fire', 'rubbish_fire', 'others'], true)) {
     sendError('Invalid incident_type.', 422);
-}
-if (!in_array($severityLevel, $allowedSeverities, true)) {
-    sendError('Invalid severity_level.', 422);
 }
 
 // Normalise the datetime from ISO-8601 (sent by JS) to MySQL DATETIME
@@ -107,19 +110,19 @@ try {
     // 2. Insert into incident_record (pre-verified since it's BFP-entered)
     $stmt = $pdo->prepare("
         INSERT INTO incident_record
-            (report_id, barangay_id, incident_type, severity_level, cause_of_fire, casualties, notes, data_time)
+            (report_id, barangay_id, incident_type, alarm_level, cause_of_fire, casualties, notes, incident_datetime)
         VALUES
-            (:report_id, :barangay_id, :incident_type, :severity_level, :cause_of_fire, :casualties, :notes, :data_time)
+            (:report_id, :barangay_id, :incident_type, :alarm_level, :cause_of_fire, :casualties, :notes, :incident_datetime)
     ");
     $stmt->execute([
-        'report_id'     => $reportId,
-        'barangay_id'   => $barangayId,
-        'incident_type' => $incidentType,
-        'severity_level'=> $severityLevel,
-        'cause_of_fire' => $causeOfFire,
-        'casualties'    => $casualties,
-        'notes'         => $notes,
-        'data_time'     => $dataTimeMysql,
+        'report_id'        => $reportId,
+        'barangay_id'      => $barangayId,
+        'incident_type'    => $incidentType,
+        'alarm_level'      => $alarmLevel,
+        'cause_of_fire'    => $causeOfFire,
+        'casualties'       => $casualties,
+        'notes'            => $notes,
+        'incident_datetime'=> $dataTimeMysql,
     ]);
 
     // 3. Log the initial status in report_status_history

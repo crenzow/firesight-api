@@ -17,7 +17,7 @@ requireAuth();
 $pdo = getDbConnection();
 
 $stmt = $pdo->query(
-    'SELECT announcement_id, title, content, announcement_type, created_at
+    'SELECT announcement_id, title, content, created_at
      FROM announcement ORDER BY created_at DESC LIMIT 50'
 );
 $rows = $stmt->fetchAll();
@@ -27,7 +27,6 @@ $result = array_map(function ($row) {
         'announcement_id' => (int) $row['announcement_id'],
         'title' => $row['title'],
         'content' => $row['content'],
-        'announcement_type' => $row['announcement_type'],
         'created_at' => $row['created_at'],
     ];
 }, $rows);

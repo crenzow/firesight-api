@@ -59,25 +59,25 @@ try {
         if (!$incidentStmt->fetchColumn()) {
             $insertIncident = $pdo->prepare(
                 "INSERT INTO incident_record
-                    (report_id, barangay_id, data_time)
+                    (report_id, barangay_id, incident_datetime)
                  VALUES
-                    (:report_id, :barangay_id, :data_time)"
+                    (:report_id, :barangay_id, :incident_datetime)"
             );
             $insertIncident->execute([
                 'report_id' => $report_id,
                 'barangay_id' => $report['barangay_id'],
-                'data_time' => $report['created_at'],
+                'incident_datetime' => $report['created_at'],
             ]);
         } else {
             $syncIncident = $pdo->prepare(
                 'UPDATE incident_record
-                 SET barangay_id = :barangay_id, data_time = :data_time
+                 SET barangay_id = :barangay_id, incident_datetime = :incident_datetime
                  WHERE report_id = :report_id'
             );
             $syncIncident->execute([
                 'report_id' => $report_id,
                 'barangay_id' => $report['barangay_id'],
-                'data_time' => $report['created_at'],
+                'incident_datetime' => $report['created_at'],
             ]);
         }
     }

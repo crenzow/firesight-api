@@ -45,8 +45,8 @@ $sql = "
         r.status,
         r.created_at,
         i.incident_type,
-        i.severity_level,
-        COALESCE(i.data_time, r.created_at) AS data_time,
+        i.alarm_level,
+        COALESCE(i.incident_datetime, r.created_at) AS data_time,
         i.cause_of_fire,
         i.casualties,
         i.notes
@@ -66,11 +66,11 @@ if ($status && in_array($status, ['accepted', 'dispatched', 'resolved'], true)) 
 }
 
 if ($year) {
-    $sql .= " AND YEAR(COALESCE(i.data_time, r.created_at)) = :year";
+    $sql .= " AND YEAR(COALESCE(i.incident_datetime, r.created_at)) = :year";
     $params['year'] = (int) $year;
 }
 
-$sql .= " ORDER BY COALESCE(i.data_time, r.created_at) DESC LIMIT 500";
+$sql .= " ORDER BY COALESCE(i.incident_datetime, r.created_at) DESC LIMIT 500";
 
 try {
     $stmt = $pdo->prepare($sql);
@@ -91,7 +91,7 @@ try {
             'status'           => $row['status'],
             'created_at'       => $row['created_at'],
             'incident_type'    => $row['incident_type'],
-            'severity_level'   => $row['severity_level'],
+            'alarm_level'      => $row['alarm_level'],
             'data_time'        => $row['data_time'],
             'cause_of_fire'    => $row['cause_of_fire'],
             'casualties'       => $row['casualties'] !== null ? (int) $row['casualties'] : null,

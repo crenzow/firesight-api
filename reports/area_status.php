@@ -43,7 +43,7 @@ if ($isLianResident) {
     $incidentStmt = $pdo->prepare(
         'SELECT COUNT(*) AS incident_count FROM incident_record
          WHERE barangay_id = :barangay_id
-           AND MONTH(data_time) = MONTH(CURDATE()) AND YEAR(data_time) = YEAR(CURDATE())'
+           AND MONTH(incident_datetime) = MONTH(CURDATE()) AND YEAR(incident_datetime) = YEAR(CURDATE())'
     );
     $incidentStmt->execute(['barangay_id' => $barangayId]);
     $incidentCount = (int) $incidentStmt->fetch()['incident_count'];
@@ -70,7 +70,7 @@ if ($isLianResident) {
 
     $incidentStmt = $pdo->query(
         'SELECT COUNT(*) AS incident_count FROM incident_record
-         WHERE MONTH(data_time) = MONTH(CURDATE()) AND YEAR(data_time) = YEAR(CURDATE())'
+         WHERE MONTH(incident_datetime) = MONTH(CURDATE()) AND YEAR(incident_datetime) = YEAR(CURDATE())'
     );
     $incidentCount = $incidentStmt ? (int) $incidentStmt->fetch()['incident_count'] : 0;
 
