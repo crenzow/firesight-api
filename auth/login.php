@@ -30,7 +30,7 @@ $pdo = getDbConnection();
 
 // Check if input is an email address (contains '@')
 if (strpos($loginInput, '@') !== false) {
-    $stmt = $pdo->prepare('SELECT * FROM user WHERE LOWER(email) = :email LIMIT 1');
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE LOWER(email) = :email LIMIT 1');
     $stmt->execute(['email' => strtolower($loginInput)]);
     $user = $stmt->fetch();
 } else {
@@ -39,7 +39,7 @@ if (strpos($loginInput, '@') !== false) {
     if (strlen($digitsOnly) >= 7) {
         $lastDigits = substr($digitsOnly, -9);
         $stmt = $pdo->prepare(
-            'SELECT * FROM user 
+            'SELECT * FROM users 
              WHERE contact_number = :login_raw 
                 OR (contact_number IS NOT NULL AND REPLACE(REPLACE(contact_number, "-", ""), " ", "") LIKE :login_digits)
              LIMIT 1'
@@ -50,7 +50,7 @@ if (strpos($loginInput, '@') !== false) {
         ]);
         $user = $stmt->fetch();
     } else {
-        $stmt = $pdo->prepare('SELECT * FROM user WHERE contact_number = :login_raw LIMIT 1');
+        $stmt = $pdo->prepare('SELECT * FROM users WHERE contact_number = :login_raw LIMIT 1');
         $stmt->execute(['login_raw' => $loginInput]);
         $user = $stmt->fetch();
     }
@@ -61,7 +61,8 @@ if (!$user || !$user['password'] || !password_verify($password, $user['password'
     sendError('Incorrect credentials. Please check your email or mobile number.', 401);
 }
 
-if ((int) $user['is_active'] === 0) {
+$isInactive = isset($user['status']) ? ($user['status'] === 'inactive') : ((int) ($user['is_active'] ?? 1) === 0);
+if ($isInactive) {
     sendError('This account has been deactivated. Please contact BFP Lian.', 403);
 }
 

@@ -47,7 +47,7 @@ $pdo = getDbConnection();
 
 // Reject duplicate emails up front with a friendly message instead of a raw
 // SQL unique-constraint error further down.
-$existing = $pdo->prepare('SELECT user_id FROM user WHERE email = :email LIMIT 1');
+$existing = $pdo->prepare('SELECT user_id FROM users WHERE email = :email LIMIT 1');
 $existing->execute(['email' => $email]);
 if ($existing->fetch()) {
     sendError('An account with this email already exists. Try signing in instead.', 409);
@@ -68,8 +68,8 @@ try {
     $passwordHash = password_hash($password, PASSWORD_BCRYPT);
 
     $insertUser = $pdo->prepare(
-        'INSERT INTO user (role, first_name, middle_name, last_name, suffix, contact_number, email, password, is_verified, is_active)
-         VALUES (\'resident\', :first_name, :middle_name, :last_name, :suffix, :mobile, :email, :password, 0, 1)'
+        'INSERT INTO users (role, status, first_name, middle_name, last_name, suffix, contact_number, email, password, is_verified)
+         VALUES (\'resident\', \'active\', :first_name, :middle_name, :last_name, :suffix, :mobile, :email, :password, 0)'
     );
     $insertUser->execute([
         'first_name' => $firstName,

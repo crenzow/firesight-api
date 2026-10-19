@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/notification_helper.php';
 require_once __DIR__ . '/incident_helper.php';
 
 $user = requireAuth();
-if ($user['role'] !== 'personnel') {
+if (!in_array($user['role'], ['bfp_personnel', 'bfp_admin'], true)) {
     sendError('Unauthorized.', 403);
 }
 

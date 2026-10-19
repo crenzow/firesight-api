@@ -5,7 +5,7 @@ require_once __DIR__ . '/../includes/response.php';
 require_once __DIR__ . '/../includes/auth_middleware.php';
 
 $user = requireAuth();
-if ($user['role'] !== 'personnel') {
+if (!in_array($user['role'], ['bfp_personnel', 'bfp_admin'], true)) {
     sendError('Unauthorized.', 403);
 }
 

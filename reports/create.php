@@ -136,7 +136,7 @@ try {
     // Notify the resident and every active BFP personnel account.
     $insertNotification = $pdo->prepare(
         'INSERT INTO notification (user_id, title, message, notification_type, is_read)
-         VALUES (:user_id, \'Report Submitted\', \'Your fire report has been received and is under review by BFP Lian.\', \'update\', 0)'
+         VALUES (:user_id, \'Report Submitted\', \'Your fire report has been received and is under review by BFP Lian.\', \'incident_alert\', 0)'
     );
     $insertNotification->execute(['user_id' => $user['user_id']]);
 

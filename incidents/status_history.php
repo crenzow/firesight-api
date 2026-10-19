@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/auth_middleware.php';
 require_once __DIR__ . '/incident_helper.php';
 
 $user = requireAuth();
-if ($user['role'] !== 'personnel') {
+if (!in_array($user['role'], ['bfp_personnel', 'bfp_admin'], true)) {
     sendError('Unauthorized.', 403);
 }
 
@@ -23,7 +23,7 @@ try {
             h.history_id, h.status, h.notes, h.created_at,
             CONCAT(u.first_name, ' ', u.last_name) AS changed_by_name
         FROM report_status_history h
-        LEFT JOIN user u ON h.changed_by = u.user_id
+        LEFT JOIN users u ON h.changed_by = u.user_id
         WHERE h.report_id = :report_id
         ORDER BY h.created_at ASC
     ";

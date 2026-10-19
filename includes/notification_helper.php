@@ -31,7 +31,7 @@ function notifyReportStatusChange(PDO $pdo, int $reportId, string $status): void
 
     $notificationStmt = $pdo->prepare(
         "INSERT INTO notification (user_id, title, message, notification_type, is_read)
-         VALUES (:user_id, 'Report Status Updated', :message, 'update', 0)"
+         VALUES (:user_id, 'Report Status Updated', :message, 'status_update', 0)"
     );
     
     $notificationStmt->execute([
@@ -53,7 +53,7 @@ function notifyPersonnelOfNewReport(PDO $pdo, int $reportId, ?string $submittedL
     $report = $reportStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
     $personnelStmt = $pdo->query(
-        "SELECT user_id FROM user WHERE role = 'personnel' AND is_active = 1"
+        "SELECT user_id FROM users WHERE role IN ('bfp_personnel', 'bfp_admin') AND status = 'active'"
     );
     $personnel = $personnelStmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -91,7 +91,7 @@ function notifyPersonnelOfNewReport(PDO $pdo, int $reportId, ?string $submittedL
 
     $notificationStmt = $pdo->prepare(
         "INSERT INTO notification (user_id, title, message, notification_type, is_read)
-         VALUES (:user_id, :title, :message, 'alert', 0)"
+         VALUES (:user_id, :title, :message, 'incident_alert', 0)"
     );
     $label = $report['ai_fire_label'] ?? null;
     $confidence = isset($report['ai_fire_confidence']) && $report['ai_fire_confidence'] !== null
@@ -113,7 +113,7 @@ function notifyPersonnelOfNewReport(PDO $pdo, int $reportId, ?string $submittedL
     foreach ($personnel as $userId) {
         $duplicateStmt = $pdo->prepare(
             'SELECT notification_id FROM notification
-             WHERE user_id = :user_id AND notification_type = \'alert\'
+             WHERE user_id = :user_id AND notification_type = \'incident_alert\'
                AND message REGEXP CONCAT("(^|[^0-9])#", :report_id, "([^0-9]|$)")
              LIMIT 1'
         );

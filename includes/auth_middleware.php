@@ -44,7 +44,7 @@ function requireAuth(): array
     $pdo = getDbConnection();
     $stmt = $pdo->prepare(
         'SELECT u.* FROM auth_token t
-         JOIN user u ON u.user_id = t.user_id
+         JOIN users u ON u.user_id = t.user_id
          WHERE t.token = :token AND (t.expires_at IS NULL OR t.expires_at > NOW())
          LIMIT 1'
     );
@@ -55,7 +55,8 @@ function requireAuth(): array
         sendError('Your session has expired. Please sign in again.', 401);
     }
 
-    if ((int) $user['is_active'] === 0) {
+    $isInactive = isset($user['status']) ? ($user['status'] === 'inactive') : ((int) ($user['is_active'] ?? 1) === 0);
+    if ($isInactive) {
         sendError('This account has been deactivated. Please contact BFP Lian.', 403);
     }
 

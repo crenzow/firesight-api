@@ -9,7 +9,7 @@ require_once __DIR__ . '/../config/database.php';
  */
 function getUserWithAddress(PDO $pdo, int $userId): ?array
 {
-    $stmt = $pdo->prepare('SELECT * FROM user WHERE user_id = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE user_id = :id LIMIT 1');
     $stmt->execute(['id' => $userId]);
     $user = $stmt->fetch();
 
@@ -27,9 +27,9 @@ function getUserWithAddress(PDO $pdo, int $userId): ?array
     $addressStmt->execute(['id' => $userId]);
     $address = $addressStmt->fetch();
 
-    // For personnel users, fetch BFP-specific details (rank, station, employee number)
+    // For BFP personnel users, fetch BFP-specific details (rank, station, employee number)
     $personnelDetails = null;
-    if ($user['role'] === 'personnel') {
+    if (in_array($user['role'], ['bfp_personnel', 'bfp_admin'], true)) {
         $pdStmt = $pdo->prepare(
             'SELECT rank, station_assigned, employee_number, duty_group
              FROM bfp_personnel_details WHERE user_id = :id LIMIT 1'

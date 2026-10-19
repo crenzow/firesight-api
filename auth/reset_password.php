@@ -25,7 +25,7 @@ if (!isStrongEnoughPassword($newPassword)) {
 
 $pdo = getDbConnection();
 $stmt = $pdo->prepare(
-    'SELECT * FROM password_reset WHERE token = :token AND is_used = 0 AND expires_at > NOW() LIMIT 1'
+    'SELECT * FROM password_reset_tokens WHERE token = :token AND created_at >= DATE_SUB(NOW(), INTERVAL 60 MINUTE) LIMIT 1'
 );
 $stmt->execute(['token' => $token]);
 $resetRow = $stmt->fetch();
@@ -34,22 +34,30 @@ if (!$resetRow) {
     sendError('This reset link is invalid or has expired. Please request a new one.', 400);
 }
 
+$userStmt = $pdo->prepare('SELECT user_id FROM users WHERE email = :email LIMIT 1');
+$userStmt->execute(['email' => $resetRow['email']]);
+$user = $userStmt->fetch();
+
+if (!$user) {
+    sendError('Account not found.', 404);
+}
+
 try {
     $pdo->beginTransaction();
 
-    $updatePassword = $pdo->prepare('UPDATE user SET password = :password WHERE user_id = :user_id');
+    $updatePassword = $pdo->prepare('UPDATE users SET password = :password WHERE user_id = :user_id');
     $updatePassword->execute([
         'password' => password_hash($newPassword, PASSWORD_BCRYPT),
-        'user_id' => $resetRow['user_id'],
+        'user_id' => $user['user_id'],
     ]);
 
-    $markUsed = $pdo->prepare('UPDATE password_reset SET is_used = 1 WHERE reset_id = :id');
-    $markUsed->execute(['id' => $resetRow['reset_id']]);
+    $deleteToken = $pdo->prepare('DELETE FROM password_reset_tokens WHERE email = :email');
+    $deleteToken->execute(['email' => $resetRow['email']]);
 
     // Invalidate all existing sessions for this account as a security
     // precaution — a reset password implies the old one may be compromised.
     $revokeTokens = $pdo->prepare('DELETE FROM auth_token WHERE user_id = :user_id');
-    $revokeTokens->execute(['user_id' => $resetRow['user_id']]);
+    $revokeTokens->execute(['user_id' => $user['user_id']]);
 
     $pdo->commit();
 } catch (Exception $e) {

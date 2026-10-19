@@ -33,17 +33,20 @@ if (!isValidEmail($email)) {
 }
 
 $pdo = getDbConnection();
-$stmt = $pdo->prepare('SELECT user_id FROM user WHERE email = :email LIMIT 1');
+$stmt = $pdo->prepare('SELECT user_id FROM users WHERE email = :email LIMIT 1');
 $stmt->execute(['email' => $email]);
 $user = $stmt->fetch();
 
 if ($user) {
     $token = generateSecureToken();
+    $delete = $pdo->prepare('DELETE FROM password_reset_tokens WHERE email = :email');
+    $delete->execute(['email' => $email]);
+
     $insert = $pdo->prepare(
-        'INSERT INTO password_reset (user_id, token, is_used, expires_at)
-         VALUES (:user_id, :token, 0, DATE_ADD(NOW(), INTERVAL 1 HOUR))'
+        'INSERT INTO password_reset_tokens (email, token, created_at)
+         VALUES (:email, :token, NOW())'
     );
-    $insert->execute(['user_id' => $user['user_id'], 'token' => $token]);
+    $insert->execute(['email' => $email, 'token' => $token]);
 
     // TODO (Phase 2 polish): replace with an actual email send via PHPMailer.
     error_log('PASSWORD RESET TOKEN for ' . $email . ': ' . $token);

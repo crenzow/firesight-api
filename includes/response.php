@@ -28,6 +28,9 @@ function sendError(string $message, int $statusCode = 400): void
 function getJsonBody(): array
 {
     $raw = file_get_contents('php://input');
+    if (!$raw && php_sapi_name() === 'cli') {
+        $raw = file_get_contents('php://stdin');
+    }
     if (!$raw) {
         return [];
     }

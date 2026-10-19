@@ -99,7 +99,7 @@ try {
     $pdo->beginTransaction();
 
     if (!empty($userUpdates)) {
-        $sql = 'UPDATE user SET ' . implode(', ', $userUpdates) . ' WHERE user_id = :user_id';
+        $sql = 'UPDATE users SET ' . implode(', ', $userUpdates) . ' WHERE user_id = :user_id';
         $pdo->prepare($sql)->execute($userParams);
     }
 

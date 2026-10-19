@@ -58,7 +58,7 @@ if (!move_uploaded_file($file['tmp_name'], $uploadDir . $fileName)) {
 
 $relativePath = 'uploads/profiles/' . $fileName;
 
-$stmt = $pdo->prepare('UPDATE user SET profile_image = :image WHERE user_id = :user_id');
+$stmt = $pdo->prepare('UPDATE users SET profile_image = :image WHERE user_id = :user_id');
 $stmt->execute([
     'image' => $relativePath,
     'user_id' => $user['user_id'],
